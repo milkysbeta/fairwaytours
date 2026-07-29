@@ -379,7 +379,7 @@ export function Enquire() {
                 </div>
 
                 {status === 'error' && (
-                  <p className="rounded-xl border border-brass-500/30 bg-brass-500/5 p-4 text-sm text-brass-400">
+                  <p className="rounded-xl border border-gold-500/30 bg-gold-500/5 p-4 text-sm text-gold-400">
                     That did not send. Email {SITE.email} and we will pick it up straight away.
                   </p>
                 )}

@@ -3,7 +3,7 @@ import { SectionHeading } from '@/components/SectionHeading'
 import { Reveal } from '@/components/Reveal'
 
 const DEMAND_STYLE: Record<string, string> = {
-  Peak: 'border-brass-500/40 text-brass-400',
+  Peak: 'border-gold-500/40 text-gold-400',
   High: 'border-fairway-500/40 text-fairway-400',
   Shoulder: 'border-bone-100/20 text-bone-300',
   Quiet: 'border-bone-100/15 text-bone-400',

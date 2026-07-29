@@ -16,7 +16,7 @@ export function Experiences() {
           {EXPERIENCES.map((exp, i) => (
             <Reveal key={exp.id} delay={(i % 3) * 0.06} className="bg-pine-950">
               <article className="group h-full bg-pine-900/40 p-8 transition-colors duration-700 hover:bg-pine-800/50">
-                <p className="text-[0.6rem] uppercase tracking-[0.2em] text-brass-500/80">
+                <p className="text-[0.6rem] uppercase tracking-[0.2em] text-gold-500/80">
                   {exp.category}
                 </p>
                 <h3 className="mt-3 text-xl text-bone-50">{exp.label}</h3>

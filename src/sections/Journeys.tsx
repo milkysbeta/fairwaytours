@@ -21,14 +21,14 @@ export function Journeys() {
               <article
                 className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border p-8 backdrop-blur-sm transition-all duration-700 md:p-10 ${
                   journey.featured
-                    ? 'border-brass-500/30 bg-pine-900/60'
+                    ? 'border-gold-500/30 bg-pine-900/60'
                     : 'border-bone-100/10 bg-pine-900/40 hover:border-fairway-500/30 hover:bg-pine-800/40'
                 }`}
               >
                 <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(111,191,115,0.10),transparent)]" />
 
                 {journey.featured && (
-                  <span className="relative mb-5 w-fit rounded-full border border-brass-500/40 px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-brass-400">
+                  <span className="relative mb-5 w-fit rounded-full border border-gold-500/40 px-3 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-gold-400">
                     Our signature
                   </span>
                 )}

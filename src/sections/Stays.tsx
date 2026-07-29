@@ -20,7 +20,7 @@ export function Stays() {
                   <p className="text-[0.6rem] uppercase tracking-[0.2em] text-bone-400/70">
                     {stay.region}
                   </p>
-                  <p className="text-[0.6rem] uppercase tracking-[0.2em] text-brass-500/70">
+                  <p className="text-[0.6rem] uppercase tracking-[0.2em] text-gold-500/70">
                     {stay.kind}
                   </p>
                 </div>

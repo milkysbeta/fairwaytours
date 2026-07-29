@@ -37,7 +37,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
           </div>
 
           {course.tier === 'championship' && (
-            <span className="absolute right-6 top-6 rounded-full border border-brass-500/40 bg-pine-950/60 px-3 py-1 text-[0.65rem] uppercase tracking-[0.2em] text-brass-400 backdrop-blur">
+            <span className="absolute right-6 top-6 rounded-full border border-gold-500/40 bg-pine-950/60 px-3 py-1 text-[0.65rem] uppercase tracking-[0.2em] text-gold-400 backdrop-blur">
               Championship
             </span>
           )}
