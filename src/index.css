@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------
+   Fairway NZ — design tokens
+   Palette direction pending client sign-off (project questions 2 & 3).
+   Deep pine green + off-white, with a restrained brass accent.
+------------------------------------------------------------------- */
+@theme {
+  --color-pine-950: #04140f;
+  --color-pine-900: #071e17;
+  --color-pine-800: #0b2b22;
+  --color-pine-700: #10392d;
+  --color-pine-600: #174c3c;
+  --color-pine-500: #1f6450;
+  --color-pine-400: #2d8468;
+  --color-pine-300: #4aa886;
+
+  --color-fairway-500: #6fbf73;
+  --color-fairway-400: #8fd694;
+
+  --color-brass-500: #b9975b;
+  --color-brass-400: #d4b884;
+
+  --color-bone-50: #fbfaf7;
+  --color-bone-100: #f3f1ea;
+  --color-bone-200: #e4e0d4;
+  --color-bone-400: #a8a394;
+
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    /* Lenis drives scrolling; native smooth-scroll would fight it. */
+    scroll-behavior: auto;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-pine-950);
+    color: var(--color-bone-100);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-fairway-500);
+    color: var(--color-pine-950);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  /* Small-caps eyebrow sitting above every section heading. */
+  .eyebrow {
+    @apply text-[0.7rem] uppercase tracking-[0.28em] text-fairway-400/70;
+  }
+
+  .container-page {
+    @apply mx-auto w-full max-w-[1240px] px-6 md:px-10;
+  }
+
+  .hairline {
+    @apply border-bone-100/10;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
