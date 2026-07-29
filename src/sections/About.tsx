@@ -17,7 +17,7 @@ export function About() {
             {/* TODO(client): portrait of Jacob — /media/jacob.jpg */}
             <motion.img
               src="/media/jacob.jpg"
-              alt={SITE.guide.name}
+              alt={SITE.founder.name}
               style={{ y: portraitY }}
               loading="lazy"
               className="absolute inset-0 h-[116%] w-full object-cover"
@@ -27,17 +27,17 @@ export function About() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-pine-950/80 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-8">
-              <p className="font-display text-2xl text-bone-50">{SITE.guide.name}</p>
-              <p className="mt-1 text-sm text-fairway-400/80">{SITE.guide.role}</p>
+              <p className="font-display text-2xl text-bone-50">{SITE.founder.name}</p>
+              <p className="mt-1 text-sm text-fairway-400/80">{SITE.founder.role}</p>
             </div>
           </div>
         </Reveal>
 
         <div>
           <Reveal>
-            <p className="eyebrow">Your guide</p>
+            <p className="eyebrow">Your host</p>
             <h2 className="mt-4 text-4xl leading-[1.08] text-bone-50 md:text-5xl">
-              The difference is who is driving.
+              Anyone can book a tee time.
             </h2>
           </Reveal>
 
@@ -45,18 +45,18 @@ export function About() {
           <Reveal delay={0.1}>
             <div className="mt-7 space-y-5 text-base leading-relaxed text-bone-400">
               <p>
-                Jacob has spent years on these courses and the roads between them. He knows which
-                tee to take when the nor'wester gets up, which table has the view, and how long the
-                Crown Range really takes on a Sunday.
+                Very few can get you onto The Hills at short notice, hold a table in Arrowtown in
+                February, or find a helicopter on a Sunday morning. That is not a booking system. It
+                is years of living here and knowing the people who say yes.
               </p>
               <p>
-                What guests tend to mention afterwards is not the logistics. It is that the day
-                worked — that a group of people who had never played together came off the
-                eighteenth still talking.
+                Jacob hosts every journey personally. He knows which tee to take when the nor'wester
+                gets up, which table has the view, and how long the Crown Range really takes when it
+                matters.
               </p>
               <p>
-                Every booking is handled personally. One number, one person, from the first message
-                to the drop-off.
+                One person, one number, from the first enquiry to the moment your clubs are checked
+                in for the flight home.
               </p>
             </div>
           </Reveal>
@@ -68,7 +68,7 @@ export function About() {
                   Handicap
                 </dt>
                 <dd className="mt-1.5 font-display text-2xl text-bone-50">
-                  {SITE.guide.handicap ?? '—'}
+                  {SITE.founder.handicap ?? '—'}
                 </dd>
               </div>
               <div>

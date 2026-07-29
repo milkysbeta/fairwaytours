@@ -69,9 +69,9 @@ export function Hero() {
         </motion.p>
 
         <h1 className="mt-6 max-w-4xl text-[clamp(2.75rem,7vw,5.5rem)] leading-[0.98] text-bone-50">
-          Golf, driven
+          The South Island,
           <br />
-          properly.
+          played properly.
         </h1>
 
         {/* Copy line crossfades with its clip. */}
@@ -95,13 +95,13 @@ export function Hero() {
             to="/enquire"
             className="rounded-full bg-bone-50 px-7 py-3.5 text-sm font-medium text-pine-950 transition-transform duration-300 hover:scale-[1.03]"
           >
-            Plan your round
+            Begin your journey
           </Link>
           <a
-            href="#services"
+            href="#itinerary"
             className="rounded-full border border-bone-100/20 px-7 py-3.5 text-sm text-bone-100 transition-colors duration-300 hover:border-bone-100/50"
           >
-            How it works
+            See the five days
           </a>
         </div>
       </motion.div>

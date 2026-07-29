@@ -79,9 +79,9 @@ export function Courses() {
     <section id="courses" className="relative py-28 md:py-40">
       <div className="container-page">
         <SectionHeading
-          eyebrow="The trail"
-          title="Five courses. One valley system."
-          lede="Wanaka to Arrowtown to the shores of Wakatipu — close enough to string together, different enough to be worth the drive."
+          eyebrow="The access"
+          title="Five courses. Two you cannot simply book."
+          lede="Wānaka to Arrowtown to the shores of Wakatipu. The Hills is private and Jacks Point rations its visitor times — getting you onto them takes a relationship, not a booking form."
         />
 
         <div className="mt-16 grid gap-5 md:grid-cols-2">

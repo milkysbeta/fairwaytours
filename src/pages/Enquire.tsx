@@ -1,34 +1,45 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { SERVICES, type ServiceMode } from '@/data/services'
+import { JOURNEYS, journeyById, type JourneyType } from '@/data/journeys'
 import { COURSES } from '@/data/courses'
-import { PACKAGES } from '@/data/packages'
+import { EXPERIENCES } from '@/data/experiences'
 import { SITE } from '@/data/site'
-import { useForecast } from '@/hooks/useForecast'
-import { VERDICT_COPY } from '@/lib/weather'
-import { EMPTY_ENQUIRY, EXTRAS, estimate, submitEnquiry, type Enquiry } from '@/lib/enquiry'
+import {
+  BUDGET_BANDS,
+  EMPTY_ENQUIRY,
+  indicativeFrom,
+  partySize,
+  submitEnquiry,
+  travelMonths,
+  type BudgetBand,
+  type Enquiry,
+} from '@/lib/enquiry'
 
-const STEPS = ['Travel', 'Golf', 'Details', 'Contact'] as const
+const STEPS = ['Journey', 'Party', 'Interests', 'Contact'] as const
+
+const nzd = (n: number) => `NZD $${n.toLocaleString('en-NZ')}`
+
+/** Shared field styling — one place so every input matches. */
+const FIELD =
+  'w-full rounded-xl border border-bone-100/15 bg-pine-900/40 px-4 py-3 text-bone-50 outline-none transition-colors placeholder:text-bone-400/50 focus:border-fairway-500'
 
 export function Enquire() {
   const [params] = useSearchParams()
-  const { days } = useForecast(14)
+  const months = useMemo(() => travelMonths(), [])
 
   const [step, setStep] = useState(0)
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
-  const [enquiry, setEnquiry] = useState<Enquiry>(() => ({
-    ...EMPTY_ENQUIRY,
-    mode: (params.get('mode') as ServiceMode | null) ?? null,
-    packageId: params.get('package'),
-    courseIds:
-      PACKAGES.find((p) => p.id === params.get('package'))?.courseIds ?? EMPTY_ENQUIRY.courseIds,
-  }))
+  const [enquiry, setEnquiry] = useState<Enquiry>(() => {
+    const requested = params.get('journey') as JourneyType | null
+    const valid = JOURNEYS.some((j) => j.id === requested) ? requested : null
+    return { ...EMPTY_ENQUIRY, journey: valid }
+  })
 
   const set = <K extends keyof Enquiry>(key: K, value: Enquiry[K]) =>
     setEnquiry((prev) => ({ ...prev, [key]: value }))
 
-  const toggle = (key: 'courseIds' | 'extras', value: string) =>
+  const toggle = (key: 'courseIds' | 'experienceIds', value: string) =>
     setEnquiry((prev) => ({
       ...prev,
       [key]: prev[key].includes(value)
@@ -36,12 +47,12 @@ export function Enquire() {
         : [...prev[key], value],
     }))
 
-  const price = useMemo(() => estimate(enquiry), [enquiry])
+  const from = indicativeFrom(enquiry)
 
   const canAdvance = [
-    enquiry.mode !== null,
-    enquiry.courseIds.length > 0,
-    enquiry.groupSize > 0,
+    enquiry.journey !== null && enquiry.travelMonth !== null,
+    enquiry.golfers > 0,
+    true, // interests are optional — never block a lead on a nice-to-have
     enquiry.name.trim() !== '' && enquiry.email.trim() !== '',
   ][step]
 
@@ -60,10 +71,11 @@ export function Enquire() {
       <main className="container-page flex min-h-[100svh] flex-col items-center justify-center text-center">
         <p className="eyebrow">Received</p>
         <h1 className="mt-5 max-w-xl text-4xl leading-tight text-bone-50 md:text-5xl">
-          Thank you — Jacob will be in touch.
+          Thank you — we will be in touch personally.
         </h1>
         <p className="mt-6 max-w-md text-bone-400">
-          You will hear back within a day, usually much sooner. If it is urgent, call {SITE.phone}.
+          You will have a considered reply within one working day, written by {SITE.founder.name}{' '}
+          rather than an autoresponder. If it is urgent, call {SITE.phone}.
         </p>
       </main>
     )
@@ -71,9 +83,9 @@ export function Enquire() {
 
   return (
     <main className="container-page min-h-[100svh] pt-32 pb-24">
-      <p className="eyebrow">Plan your round</p>
+      <p className="eyebrow">Begin your journey</p>
       <h1 className="mt-4 max-w-2xl text-4xl leading-[1.08] text-bone-50 md:text-5xl">
-        Four questions and we will take it from there.
+        Tell us the shape of it. We will build the rest.
       </h1>
 
       {/* Step rail */}
@@ -106,37 +118,170 @@ export function Enquire() {
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
             {step === 0 && (
-              <fieldset>
-                <legend className="text-xl text-bone-50">Whose car are we taking?</legend>
-                <div className="mt-7 grid gap-3">
-                  {SERVICES.map((s) => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => set('mode', s.id)}
-                      className={`rounded-xl border p-6 text-left transition-all duration-400 ${
-                        enquiry.mode === s.id
-                          ? 'border-fairway-500 bg-fairway-500/[0.07]'
-                          : 'border-bone-100/10 bg-pine-900/40 hover:border-bone-100/25'
-                      }`}
-                    >
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-lg text-bone-50">{s.label}</span>
-                        <span className="text-xs tracking-widest text-brass-500">
-                          {s.priceSignal}
-                        </span>
-                      </div>
-                      <p className="mt-1.5 text-sm text-bone-400">{s.tagline}</p>
-                    </button>
-                  ))}
+              <div className="space-y-10">
+                <fieldset>
+                  <legend className="text-xl text-bone-50">What kind of journey?</legend>
+                  <div className="mt-7 grid gap-3">
+                    {JOURNEYS.map((j) => (
+                      <button
+                        key={j.id}
+                        type="button"
+                        onClick={() => set('journey', j.id)}
+                        className={`rounded-xl border p-6 text-left transition-all duration-400 ${
+                          enquiry.journey === j.id
+                            ? 'border-fairway-500 bg-fairway-500/[0.07]'
+                            : 'border-bone-100/10 bg-pine-900/40 hover:border-bone-100/25'
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <span className="text-lg text-bone-50">{j.label}</span>
+                          <span className="text-xs uppercase tracking-[0.14em] text-bone-400/70">
+                            {j.duration}
+                          </span>
+                        </div>
+                        <p className="mt-1.5 text-sm text-bone-400">{j.tagline}</p>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <div>
+                  <label htmlFor="travelMonth" className="text-xl text-bone-50">
+                    Roughly when?
+                  </label>
+                  <p className="mt-2 text-sm text-bone-400">
+                    A month is enough at this stage. The best courses and lodges are held six to nine
+                    months ahead, so the earlier we know, the more we can secure.
+                  </p>
+                  <select
+                    id="travelMonth"
+                    value={enquiry.travelMonth ?? ''}
+                    onChange={(e) => set('travelMonth', e.target.value || null)}
+                    className={`${FIELD} mt-5 max-w-xs`}
+                  >
+                    <option value="">Select a month</option>
+                    {months.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </fieldset>
+
+                <div>
+                  <label htmlFor="nights" className="text-xl text-bone-50">
+                    How many nights?
+                  </label>
+                  <input
+                    id="nights"
+                    type="number"
+                    min={1}
+                    max={21}
+                    placeholder="4"
+                    value={enquiry.nights ?? ''}
+                    onChange={(e) => set('nights', e.target.value ? Number(e.target.value) : null)}
+                    className={`${FIELD} mt-5 w-32`}
+                  />
+                </div>
+              </div>
             )}
 
             {step === 1 && (
               <div className="space-y-10">
                 <fieldset>
-                  <legend className="text-xl text-bone-50">Where would you like to play?</legend>
+                  <legend className="text-xl text-bone-50">Who is travelling?</legend>
+                  <p className="mt-2 text-sm text-bone-400">
+                    Non-golfers are not an afterthought — we build them a parallel itinerary.
+                  </p>
+                  <div className="mt-7 flex flex-wrap gap-6">
+                    <div>
+                      <label htmlFor="golfers" className="text-sm text-bone-400">
+                        Golfers
+                      </label>
+                      <input
+                        id="golfers"
+                        type="number"
+                        min={1}
+                        max={40}
+                        value={enquiry.golfers}
+                        onChange={(e) => set('golfers', Number(e.target.value))}
+                        className={`${FIELD} mt-2 w-28`}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="nonGolfers" className="text-sm text-bone-400">
+                        Not playing
+                      </label>
+                      <input
+                        id="nonGolfers"
+                        type="number"
+                        min={0}
+                        max={40}
+                        value={enquiry.nonGolfers}
+                        onChange={(e) => set('nonGolfers', Number(e.target.value))}
+                        className={`${FIELD} mt-2 w-28`}
+                      />
+                    </div>
+                  </div>
+                </fieldset>
+
+                <div>
+                  <label htmlFor="origin" className="text-xl text-bone-50">
+                    Flying from?
+                  </label>
+                  <p className="mt-2 text-sm text-bone-400">
+                    So we call at a civilised hour in your timezone, and plan around your arrival.
+                  </p>
+                  <select
+                    id="origin"
+                    value={enquiry.origin}
+                    onChange={(e) => set('origin', e.target.value)}
+                    className={`${FIELD} mt-5 max-w-xs`}
+                  >
+                    <option value="">Select</option>
+                    {SITE.markets.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <fieldset>
+                  <legend className="text-xl text-bone-50">Budget per guest</legend>
+                  <p className="mt-2 text-sm text-bone-400">
+                    Optional, and it steers the proposal rather than filtering you out.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-2.5">
+                    {BUDGET_BANDS.map((b) => (
+                      <button
+                        key={b.id}
+                        type="button"
+                        onClick={() =>
+                          set('budgetBand', enquiry.budgetBand === b.id ? null : (b.id as BudgetBand))
+                        }
+                        className={`rounded-full border px-4 py-2 text-sm transition-all duration-300 ${
+                          enquiry.budgetBand === b.id
+                            ? 'border-fairway-500 bg-fairway-500/10 text-fairway-400'
+                            : 'border-bone-100/15 text-bone-200 hover:border-bone-100/35'
+                        }`}
+                      >
+                        {b.label}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-10">
+                <fieldset>
+                  <legend className="text-xl text-bone-50">Courses you have in mind</legend>
+                  <p className="mt-2 text-sm text-bone-400">
+                    Leave it blank if you would rather we chose. Access at the private clubs is
+                    arranged case by case.
+                  </p>
                   <div className="mt-7 grid gap-3 sm:grid-cols-2">
                     {COURSES.map((c) => (
                       <button
@@ -150,8 +295,8 @@ export function Enquire() {
                         }`}
                       >
                         <span className="text-bone-50">{c.name}</span>
-                        <p className="mt-1 text-xs text-bone-400">
-                          {c.region} · {c.driveMinutesFromWanaka} min from Wanaka
+                        <p className="mt-1 text-xs capitalize text-bone-400">
+                          {c.region} · {c.tier}
                         </p>
                       </button>
                     ))}
@@ -159,105 +304,20 @@ export function Enquire() {
                 </fieldset>
 
                 <fieldset>
-                  <legend className="text-xl text-bone-50">Which day?</legend>
-                  <p className="mt-2 text-sm text-bone-400">
-                    Scored for golf. Pick whichever suits — we will tell you honestly if another day
-                    is better.
-                  </p>
-                  <div className="-mx-6 mt-6 flex gap-3 overflow-x-auto px-6 pb-3">
-                    {days.slice(0, 14).map((d) => {
-                      const date = new Date(`${d.date}T00:00:00`)
-                      const selected = enquiry.date === d.date
-                      return (
-                        <button
-                          key={d.date}
-                          type="button"
-                          onClick={() => set('date', d.date)}
-                          title={VERDICT_COPY[d.verdict]}
-                          className={`min-w-[6rem] rounded-xl border p-4 text-left transition-all duration-400 ${
-                            selected
-                              ? 'border-fairway-500 bg-fairway-500/[0.07]'
-                              : 'border-bone-100/10 bg-pine-900/40 hover:border-bone-100/25'
-                          }`}
-                        >
-                          <p className="text-[0.62rem] uppercase tracking-[0.16em] text-bone-400/70">
-                            {date.toLocaleDateString('en-NZ', { weekday: 'short' })}
-                          </p>
-                          <p className="mt-0.5 text-sm text-bone-200">
-                            {date.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short' })}
-                          </p>
-                          <p className="mt-3 text-lg text-bone-50">{d.tempMaxC}°</p>
-                          <div className="mt-3 h-0.5 overflow-hidden rounded-full bg-bone-100/10">
-                            <div
-                              className={`h-full rounded-full ${
-                                d.score >= 82
-                                  ? 'bg-fairway-400'
-                                  : d.score >= 64
-                                    ? 'bg-fairway-500/70'
-                                    : d.score >= 42
-                                      ? 'bg-brass-500/70'
-                                      : 'bg-bone-400/30'
-                              }`}
-                              style={{ width: `${d.score}%` }}
-                            />
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
-                  <p className="mt-3 text-xs text-bone-400/70">
-                    Travelling further out? Tell us the dates in the notes and we will work to them.
-                  </p>
-                </fieldset>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-10">
-                <div>
-                  <label htmlFor="groupSize" className="text-xl text-bone-50">
-                    How many playing?
-                  </label>
-                  <input
-                    id="groupSize"
-                    type="number"
-                    min={1}
-                    max={40}
-                    value={enquiry.groupSize}
-                    onChange={(e) => set('groupSize', Number(e.target.value))}
-                    className="mt-5 w-32 rounded-xl border border-bone-100/15 bg-pine-900/40 px-4 py-3 text-bone-50 outline-none transition-colors focus:border-fairway-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="pickup" className="text-xl text-bone-50">
-                    Where are we collecting you?
-                  </label>
-                  <input
-                    id="pickup"
-                    type="text"
-                    placeholder="Hotel, address, or Queenstown Airport"
-                    value={enquiry.pickupLocation}
-                    onChange={(e) => set('pickupLocation', e.target.value)}
-                    className="mt-5 w-full rounded-xl border border-bone-100/15 bg-pine-900/40 px-4 py-3 text-bone-50 outline-none transition-colors placeholder:text-bone-400/50 focus:border-fairway-500"
-                  />
-                </div>
-
-                <fieldset>
-                  <legend className="text-xl text-bone-50">Anything else to arrange?</legend>
+                  <legend className="text-xl text-bone-50">Beyond the golf</legend>
                   <div className="mt-5 flex flex-wrap gap-2.5">
-                    {EXTRAS.map((x) => (
+                    {EXPERIENCES.map((x) => (
                       <button
-                        key={x}
+                        key={x.id}
                         type="button"
-                        onClick={() => toggle('extras', x)}
+                        onClick={() => toggle('experienceIds', x.id)}
                         className={`rounded-full border px-4 py-2 text-sm transition-all duration-300 ${
-                          enquiry.extras.includes(x)
+                          enquiry.experienceIds.includes(x.id)
                             ? 'border-fairway-500 bg-fairway-500/10 text-fairway-400'
                             : 'border-bone-100/15 text-bone-200 hover:border-bone-100/35'
                         }`}
                       >
-                        {x}
+                        {x.label}
                       </button>
                     ))}
                   </div>
@@ -275,7 +335,7 @@ export function Enquire() {
                     id="name"
                     value={enquiry.name}
                     onChange={(e) => set('name', e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-bone-100/15 bg-pine-900/40 px-4 py-3 text-bone-50 outline-none transition-colors focus:border-fairway-500"
+                    className={`${FIELD} mt-2`}
                   />
                 </div>
                 <div className="grid gap-5 sm:grid-cols-2">
@@ -288,7 +348,7 @@ export function Enquire() {
                       type="email"
                       value={enquiry.email}
                       onChange={(e) => set('email', e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-bone-100/15 bg-pine-900/40 px-4 py-3 text-bone-50 outline-none transition-colors focus:border-fairway-500"
+                      className={`${FIELD} mt-2`}
                     />
                   </div>
                   <div>
@@ -300,20 +360,21 @@ export function Enquire() {
                       type="tel"
                       value={enquiry.phone}
                       onChange={(e) => set('phone', e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-bone-100/15 bg-pine-900/40 px-4 py-3 text-bone-50 outline-none transition-colors focus:border-fairway-500"
+                      className={`${FIELD} mt-2`}
                     />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="notes" className="text-sm text-bone-400">
-                    Anything we should know?
+                    Anything that would help us plan?
                   </label>
                   <textarea
                     id="notes"
                     rows={4}
+                    placeholder="Handicaps, an anniversary, a course you have always wanted to play, someone who would rather not be on a golf course at all."
                     value={enquiry.notes}
                     onChange={(e) => set('notes', e.target.value)}
-                    className="mt-2 w-full resize-none rounded-xl border border-bone-100/15 bg-pine-900/40 px-4 py-3 text-bone-50 outline-none transition-colors focus:border-fairway-500"
+                    className={`${FIELD} mt-2 resize-none`}
                   />
                 </div>
 
@@ -329,12 +390,26 @@ export function Enquire() {
 
         {/* Running summary */}
         <aside className="h-fit rounded-2xl border border-bone-100/10 bg-pine-900/40 p-6 lg:sticky lg:top-28">
-          <p className="eyebrow">Your day</p>
+          <p className="eyebrow">Your journey</p>
           <dl className="mt-5 space-y-4 text-sm">
             <div>
-              <dt className="text-bone-400/60">Travel</dt>
+              <dt className="text-bone-400/60">Journey</dt>
               <dd className="mt-0.5 text-bone-100">
-                {SERVICES.find((s) => s.id === enquiry.mode)?.label ?? '—'}
+                {enquiry.journey ? journeyById(enquiry.journey).label : '—'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-bone-400/60">When</dt>
+              <dd className="mt-0.5 text-bone-100">
+                {months.find((m) => m.value === enquiry.travelMonth)?.label ?? '—'}
+                {enquiry.nights ? ` · ${enquiry.nights} nights` : ''}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-bone-400/60">Party</dt>
+              <dd className="mt-0.5 text-bone-100">
+                {partySize(enquiry)} guest{partySize(enquiry) === 1 ? '' : 's'}
+                {enquiry.nonGolfers > 0 ? ` · ${enquiry.nonGolfers} not playing` : ''}
               </dd>
             </div>
             <div>
@@ -345,35 +420,20 @@ export function Enquire() {
                       .map((id) => COURSES.find((c) => c.id === id)?.name)
                       .filter(Boolean)
                       .join(', ')
-                  : '—'}
+                  : 'Our recommendation'}
               </dd>
-            </div>
-            <div>
-              <dt className="text-bone-400/60">Date</dt>
-              <dd className="mt-0.5 text-bone-100">
-                {enquiry.date
-                  ? new Date(`${enquiry.date}T00:00:00`).toLocaleDateString('en-NZ', {
-                      weekday: 'long',
-                      day: 'numeric',
-                      month: 'long',
-                    })
-                  : '—'}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-bone-400/60">Group</dt>
-              <dd className="mt-0.5 text-bone-100">{enquiry.groupSize}</dd>
             </div>
           </dl>
 
           <div className="mt-6 border-t border-bone-100/10 pt-5">
-            <p className="text-bone-400/60 text-sm">Indicative</p>
+            <p className="text-sm text-bone-400/60">Indicative from</p>
             <p className="mt-1 font-display text-2xl text-bone-50">
-              {price ? `NZ$${price.low}–${price.high}` : 'On enquiry'}
+              {from ? nzd(from) : 'On brief'}
+              {from && <span className="ml-1.5 text-xs text-bone-400">per guest</span>}
             </p>
             <p className="mt-2 text-xs leading-relaxed text-bone-400/70">
-              Green fees are not included. Jacob confirms the exact figure before anything is
-              booked.
+              Twin share, excluding flights. Every itinerary is costed by hand against live rates
+              before anything is confirmed.
             </p>
           </div>
         </aside>

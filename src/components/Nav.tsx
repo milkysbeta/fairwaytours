@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 import { SITE } from '@/data/site'
 
 const LINKS = [
-  { href: '/#services', label: 'How it works' },
+  { href: '/#journeys', label: 'Journeys' },
+  { href: '/#itinerary', label: 'The five days' },
   { href: '/#courses', label: 'Courses' },
-  { href: '/#packages', label: 'Packages' },
-  { href: '/#conditions', label: 'Conditions' },
-  { href: '/#about', label: 'Jacob' },
+  { href: '/#experiences', label: 'Experiences' },
+  { href: '/#seasons', label: 'When to come' },
 ]
 
 export function Nav() {
@@ -52,7 +52,7 @@ export function Nav() {
             to="/enquire"
             className="rounded-full border border-fairway-500/40 bg-fairway-500/10 px-5 py-2.5 text-sm text-fairway-400 transition-all duration-300 hover:border-fairway-500 hover:bg-fairway-500 hover:text-pine-950"
           >
-            Plan your round
+            Begin
           </Link>
           <button
             type="button"

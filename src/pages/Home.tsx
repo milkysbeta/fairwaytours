@@ -1,18 +1,27 @@
 import { Hero } from '@/sections/Hero'
-import { Services } from '@/sections/Services'
+import { Journeys } from '@/sections/Journeys'
+import { Itinerary } from '@/sections/Itinerary'
 import { Courses } from '@/sections/Courses'
-import { Packages } from '@/sections/Packages'
-import { Conditions } from '@/sections/Conditions'
+import { Experiences } from '@/sections/Experiences'
+import { Stays } from '@/sections/Stays'
+import { Seasons } from '@/sections/Seasons'
 import { About } from '@/sections/About'
 
+/**
+ * The order is the argument: what it is (journeys) → what it feels like (the
+ * five days) → the access (courses) → what surrounds it (experiences, stays) →
+ * when to come → who is behind it.
+ */
 export function Home() {
   return (
     <main>
       <Hero />
-      <Services />
+      <Journeys />
+      <Itinerary />
       <Courses />
-      <Packages />
-      <Conditions />
+      <Experiences />
+      <Stays />
+      <Seasons />
       <About />
     </main>
   )
