@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { HERO_SEQUENCE } from '@/data/hero'
+import { HERO_POSTER, HERO_SEQUENCE } from '@/data/hero'
 import { SITE } from '@/data/site'
 
 export function Hero() {
@@ -29,9 +29,20 @@ export function Hero() {
   return (
     <section ref={ref} className="relative h-[100svh] w-full overflow-hidden">
       <motion.div style={{ y: mediaY, scale: mediaScale }} className="absolute inset-0">
-        {/* Poster gradient. Always rendered — it is the fallback when footage is
-            missing, and the backdrop the clips sit on while they crossfade. */}
+        {/* Gradient under everything, so a missing poster still reads as a
+            deliberate ground rather than a hole. */}
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_10%,var(--color-pine-700),var(--color-pine-950)_70%)]" />
+
+        {/* Still frame. Carries the hero until footage lands, then sits behind
+            the clips while they crossfade. */}
+        <img
+          src={HERO_POSTER}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+        />
 
         {hasVideo && (
           <AnimatePresence mode="sync">
@@ -52,7 +63,10 @@ export function Hero() {
           </AnimatePresence>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-b from-pine-950/60 via-pine-950/25 to-pine-950" />
+        {/* Two scrims: one down the page for the nav, one from the lower-left
+            so the headline holds up over bright imagery. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-pine-950/70 via-pine-950/20 to-pine-950" />
+        <div className="absolute inset-0 bg-[linear-gradient(100deg,var(--color-pine-950)_0%,rgba(4,20,15,0.55)_38%,transparent_68%)]" />
       </motion.div>
 
       <motion.div

@@ -28,7 +28,8 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
               e.currentTarget.style.display = 'none'
             }}
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_35%,var(--color-pine-950))]" />
+          {/* Starts low so the photograph survives; the name still reads. */}
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgba(4,20,15,0.75)_78%,var(--color-pine-950))]" />
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(90%_70%_at_50%_20%,var(--color-pine-700),var(--color-pine-950))]" />
 
           <div className="absolute inset-x-0 bottom-0 p-7">

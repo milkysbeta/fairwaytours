@@ -11,6 +11,8 @@ export type Experience = {
   label: string
   category: 'Air' | 'Table' | 'Water' | 'Land' | 'Stillness'
   blurb: string
+  /** Optional. Only a few carry imagery, so the grid stays typographic. */
+  image?: string
 }
 
 export const EXPERIENCES: Experience[] = [
@@ -37,6 +39,7 @@ export const EXPERIENCES: Experience[] = [
     label: 'Private chef',
     category: 'Table',
     blurb: 'A long table at the villa, and nowhere to be afterwards.',
+    image: '/media/experiences/table.jpg',
   },
   {
     id: 'whisky',
@@ -61,6 +64,7 @@ export const EXPERIENCES: Experience[] = [
     label: 'High-country hunting',
     category: 'Land',
     blurb: 'Guided stalks on private stations. Arranged by season and by request.',
+    image: '/media/experiences/clubs.jpg',
   },
   {
     id: 'spa',

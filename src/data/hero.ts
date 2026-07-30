@@ -15,6 +15,12 @@ export type HeroSegment = {
   hold: number
 }
 
+/**
+ * Shown under the film, and on its own until footage exists. Currently a
+ * moodboard placeholder — see public/media/CREDITS.md before launch.
+ */
+export const HERO_POSTER = '/media/hero/poster.jpg'
+
 export const HERO_SEQUENCE: HeroSegment[] = [
   { id: 'arrival', src: '/media/hero/01-arrival.mp4', line: 'You land.', hold: 4.5 },
   {
