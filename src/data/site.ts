@@ -19,6 +19,22 @@ export const SITE = {
     handicap: null as number | null,
   },
   base: { label: 'Wānaka & Queenstown, Central Otago', lat: -44.7, lon: 169.15 },
+
+  /**
+   * The forecast area. Both towns are sampled and averaged — they sit 70km
+   * apart over the Crown Range and routinely differ by a degree or two, so one
+   * point would misrepresent the other.
+   *
+   * NOTE: the baked climate normals in data/climate.ts are Wānaka-only. Rerun
+   * the archive query for both points if the region ever needs its own normals.
+   */
+  region: {
+    label: 'Queenstown & Wānaka',
+    points: [
+      { name: 'Wānaka', lat: -44.7, lon: 169.15 },
+      { name: 'Queenstown', lat: -45.03, lon: 168.66 },
+    ],
+  },
   /** Source markets the itineraries and enquiry flow are written for. */
   markets: [
     'Australia',

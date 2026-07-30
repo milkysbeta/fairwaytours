@@ -1,6 +1,7 @@
 import { STAYS } from '@/data/stays'
 import { SectionHeading } from '@/components/SectionHeading'
 import { Reveal } from '@/components/Reveal'
+import { Parallax } from '@/components/Parallax'
 
 export function Stays() {
   return (
@@ -14,7 +15,8 @@ export function Stays() {
 
         <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {STAYS.map((stay, i) => (
-            <Reveal key={stay.id} delay={i * 0.07}>
+            <Parallax key={stay.id} distance={i % 2 === 0 ? 26 : -18} className="h-full">
+              <Reveal delay={i * 0.07} className="h-full">
               <article className="flex h-full flex-col rounded-2xl border border-bone-100/10 bg-pine-900/40 p-7 transition-colors duration-700 hover:border-bone-100/20">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="text-[0.6rem] uppercase tracking-[0.2em] text-bone-400/70">
@@ -37,8 +39,9 @@ export function Stays() {
                 <p className="mt-3 text-sm leading-relaxed text-bone-400">
                   {stay.confirmed ? stay.blurb : 'Named once the partnership is confirmed.'}
                 </p>
-              </article>
-            </Reveal>
+                </article>
+              </Reveal>
+            </Parallax>
           ))}
         </div>
       </div>

@@ -8,13 +8,15 @@ import {
   normalFor,
   rankFor,
 } from '@/data/climate'
+import { SITE } from '@/data/site'
 import { useForecast } from '@/hooks/useForecast'
 import {
+  FORECAST_PROVIDER,
   outlookFromForecast,
   outlookFromNormal,
   VERDICT_COPY,
+  describeCode,
   type DayOutlook,
-  type GolfVerdict,
 } from '@/lib/weather'
 
 const ISO = (d: Date) =>
@@ -23,22 +25,57 @@ const ISO = (d: Date) =>
 /** Monday-first, as New Zealand reads a calendar. */
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
-const VERDICT_DOT: Record<GolfVerdict, string> = {
-  exceptional: 'bg-fairway-400',
-  good: 'bg-fairway-500/80',
-  playable: 'bg-gold-500/80',
-  marginal: 'bg-bone-400/40',
-}
-
-const DEMAND_STYLE: Record<string, string> = {
-  Peak: 'border-gold-500/40 text-gold-400',
-  High: 'border-fairway-500/40 text-fairway-400',
-  Shoulder: 'border-bone-100/20 text-bone-300',
-  Quiet: 'border-bone-100/15 text-bone-400',
-}
-
 /** How many months ahead a guest can look. Beyond two years is fantasy. */
 const HORIZON_MONTHS = 23
+
+/**
+ * The gold ring marks a day at the top verdict band — the same threshold the
+ * rest of the site calls "exceptional", rather than a second invented number.
+ *
+ * Only forecast days can earn it. A monthly normal peaks at 74 (March), so no
+ * typical day ever rings, which is correct: you cannot know a specific date six
+ * months out is perfect, and pretending otherwise is the one thing this feature
+ * must not do.
+ */
+const ringed = (o: DayOutlook) => o.source === 'forecast' && o.verdict === 'exceptional'
+
+export type Overlay = 'golf' | 'rain' | 'off'
+
+const OVERLAYS: { id: Overlay; label: string }[] = [
+  { id: 'golf', label: 'Playing conditions' },
+  { id: 'rain', label: 'Rain' },
+  { id: 'off', label: 'Off' },
+]
+
+const DEMAND_STYLE: Record<string, string> = {
+  Peak: 'border-gold-500/50 text-gold-600',
+  High: 'border-turf-600/40 text-turf-700',
+  Shoulder: 'border-pine-950/15 text-pine-950/60',
+  Quiet: 'border-pine-950/10 text-pine-950/45',
+}
+
+/**
+ * Tint for one cell. Green carries how good the golf is, blue carries how wet —
+ * both over white, so the calendar reads as paper with weather laid on top
+ * rather than as a dark chart.
+ */
+function tintFor(outlook: DayOutlook, overlay: Overlay): string {
+  if (overlay === 'off') return 'transparent'
+
+  if (overlay === 'rain') {
+    // Forecast days know their probability; typical days fall back to the
+    // month's wet-day share, which is the same quantity averaged.
+    const wet =
+      outlook.precipChance ?? normalFor(Number(outlook.date.slice(5, 7))).wetDayPct
+    const a = Math.min(0.5, (wet / 100) * 0.55)
+    return `rgba(56, 122, 173, ${a.toFixed(3)})`
+  }
+
+  // Below ~45 there is nothing worth colouring in; above that, ramp up.
+  const t = Math.max(0, (outlook.score - 45) / 55)
+  const a = Math.min(0.46, t * 0.5)
+  return `rgba(27, 101, 53, ${a.toFixed(3)})`
+}
 
 type Props = {
   selected: string | null
@@ -51,6 +88,8 @@ export function ConditionsCalendar({ selected, onSelect, compact = false }: Prop
   const { days: forecast, error } = useForecast(16)
   const today = useMemo(() => new Date(new Date().toDateString()), [])
   const [offset, setOffset] = useState(0)
+  const [overlay, setOverlay] = useState<Overlay>('golf')
+  const [hovered, setHovered] = useState<string | null>(null)
 
   // Kept as primitives so the grid memo below has stable dependencies.
   const year = today.getFullYear() + Math.floor((today.getMonth() + offset) / 12)
@@ -87,43 +126,65 @@ export function ConditionsCalendar({ selected, onSelect, compact = false }: Prop
   }, [year, monthIndex, byDate, normal, today])
 
   const monthLabel = cursor.toLocaleDateString('en-NZ', { month: 'long', year: 'numeric' })
-  const forecastDaysThisMonth = cells.filter(
-    (c) => c && !c.past && c.outlook.source === 'forecast',
-  ).length
+  const forecastDays = cells.filter((c) => c && !c.past && c.outlook.source === 'forecast').length
+  const hoveredCell = cells.find((c) => c && c.iso === hovered) || null
 
   return (
     <div className={compact ? '' : 'grid gap-10 lg:grid-cols-[1fr_18rem]'}>
-      <div>
-        {/* Month navigation */}
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setOffset((o) => Math.max(0, o - 1))}
-            disabled={offset === 0}
-            aria-label="Previous month"
-            className="rounded-full border border-bone-100/15 px-3 py-1.5 text-sm text-bone-300 transition-colors hover:border-bone-100/40 hover:text-bone-50 disabled:opacity-25"
-          >
-            ←
-          </button>
+      {/* The calendar sits on paper. */}
+      <div className="rounded-2xl border border-pine-950/10 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(4,20,15,0.45)] md:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setOffset((o) => Math.max(0, o - 1))}
+              disabled={offset === 0}
+              aria-label="Previous month"
+              className="rounded-full border border-pine-950/15 px-3 py-1.5 text-sm text-pine-950/70 transition-colors hover:border-pine-950/40 hover:text-pine-950 disabled:opacity-25"
+            >
+              ←
+            </button>
+            <p className="font-display text-xl text-pine-950">{monthLabel}</p>
+            <button
+              type="button"
+              onClick={() => setOffset((o) => Math.min(HORIZON_MONTHS, o + 1))}
+              disabled={offset === HORIZON_MONTHS}
+              aria-label="Next month"
+              className="rounded-full border border-pine-950/15 px-3 py-1.5 text-sm text-pine-950/70 transition-colors hover:border-pine-950/40 hover:text-pine-950 disabled:opacity-25"
+            >
+              →
+            </button>
+          </div>
 
-          <p className="font-display text-xl text-bone-50">{monthLabel}</p>
-
-          <button
-            type="button"
-            onClick={() => setOffset((o) => Math.min(HORIZON_MONTHS, o + 1))}
-            disabled={offset === HORIZON_MONTHS}
-            aria-label="Next month"
-            className="rounded-full border border-bone-100/15 px-3 py-1.5 text-sm text-bone-300 transition-colors hover:border-bone-100/40 hover:text-bone-50 disabled:opacity-25"
+          {/* Overlay switch. */}
+          <div
+            role="group"
+            aria-label="Weather overlay"
+            className="flex rounded-full border border-pine-950/12 p-1"
           >
-            →
-          </button>
+            {OVERLAYS.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => setOverlay(o.id)}
+                aria-pressed={overlay === o.id}
+                className={`rounded-full px-3 py-1.5 text-[0.68rem] uppercase tracking-[0.12em] transition-colors duration-300 ${
+                  overlay === o.id
+                    ? 'bg-pine-950 text-bone-50'
+                    : 'text-pine-950/55 hover:text-pine-950'
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="mt-7 grid grid-cols-7 gap-1.5">
           {WEEKDAYS.map((d, i) => (
             <p
               key={i}
-              className="pb-2 text-center text-[0.6rem] uppercase tracking-[0.16em] text-bone-400/50"
+              className="pb-2 text-center text-[0.6rem] uppercase tracking-[0.16em] text-pine-950/35"
             >
               {d}
             </p>
@@ -138,31 +199,39 @@ export function ConditionsCalendar({ selected, onSelect, compact = false }: Prop
                 type="button"
                 disabled={cell.past}
                 onClick={() => onSelect(cell.iso)}
+                onMouseEnter={() => setHovered(cell.iso)}
+                onMouseLeave={() => setHovered((h) => (h === cell.iso ? null : h))}
+                onFocus={() => setHovered(cell.iso)}
                 aria-pressed={selected === cell.iso}
-                title={`${VERDICT_COPY[cell.outlook.verdict]} · ${
-                  cell.outlook.source === 'forecast' ? 'forecast' : 'typical for the month'
-                }`}
                 className={`group relative flex aspect-square flex-col items-center justify-center rounded-lg border transition-all duration-300 ${
                   cell.past
-                    ? 'cursor-default border-transparent text-bone-400/20'
+                    ? 'cursor-default border-transparent text-pine-950/15'
                     : selected === cell.iso
-                      ? 'border-fairway-500 bg-fairway-500/15 text-bone-50'
-                      : 'border-bone-100/10 bg-pine-900/40 text-bone-200 hover:border-bone-100/30'
+                      ? 'border-turf-600 text-pine-950 ring-2 ring-turf-600/30'
+                      : 'border-pine-950/8 text-pine-950/80 hover:border-pine-950/25'
                 }`}
+                style={
+                  cell.past ? undefined : { backgroundColor: tintFor(cell.outlook, overlay) }
+                }
               >
-                <span className="text-sm tabular-nums">{cell.day}</span>
+                {/* Gold ring: only the days that are genuinely perfect. */}
+                {!cell.past && ringed(cell.outlook) && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-[3px] rounded-md ring-2 ring-gold-500/85"
+                  />
+                )}
+
+                <span className="relative text-sm tabular-nums">{cell.day}</span>
 
                 {!cell.past && (
                   <>
-                    <span className="mt-1 text-[0.6rem] tabular-nums text-bone-400">
+                    <span className="relative mt-0.5 text-[0.6rem] tabular-nums text-pine-950/55">
                       {cell.outlook.tempMaxC}°
                     </span>
-                    <span
-                      className={`mt-1 h-1 w-1 rounded-full ${VERDICT_DOT[cell.outlook.verdict]}`}
-                    />
                     {/* A forecast day is a real prediction; mark it as one. */}
                     {cell.outlook.source === 'forecast' && (
-                      <span className="absolute right-1 top-1 h-1 w-1 rounded-full bg-bone-100/50" />
+                      <span className="absolute right-1.5 top-1.5 h-1 w-1 rounded-full bg-pine-950/40" />
                     )}
                   </>
                 )}
@@ -171,17 +240,47 @@ export function ConditionsCalendar({ selected, onSelect, compact = false }: Prop
           )}
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.68rem] text-bone-400">
-          <span className="flex items-center gap-2">
-            <span className="h-1 w-1 rounded-full bg-bone-100/50" />
-            Forecast
-            {forecastDaysThisMonth > 0 && ` (next ${forecastDaysThisMonth} days)`}
-          </span>
-          <span>Unmarked days show typical conditions for the month</span>
+        {/* Hover readout, so the overlay can be interrogated without clicking. */}
+        <div className="mt-6 flex min-h-[2.75rem] flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-pine-950/8 pt-4">
+          {hoveredCell && !hoveredCell.past ? (
+            <motion.p
+              key={hoveredCell.iso}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="text-sm text-pine-950/80"
+            >
+              <span className="font-medium">
+                {new Date(`${hoveredCell.iso}T00:00:00`).toLocaleDateString('en-NZ', {
+                  day: 'numeric',
+                  month: 'long',
+                })}
+              </span>
+              {' — '}
+              {VERDICT_COPY[hoveredCell.outlook.verdict].toLowerCase()}, {hoveredCell.outlook.tempMaxC}°
+              {hoveredCell.outlook.precipChance !== undefined &&
+                `, ${hoveredCell.outlook.precipChance}% rain`}
+              , {hoveredCell.outlook.windMaxKmh} km/h
+              {hoveredCell.outlook.code !== undefined &&
+                ` · ${describeCode(hoveredCell.outlook.code).toLowerCase()}`}
+              <span className="ml-2 text-pine-950/40">
+                {hoveredCell.outlook.source === 'forecast' ? 'forecast' : 'typical'}
+              </span>
+            </motion.p>
+          ) : (
+            <p className="text-[0.7rem] text-pine-950/45">
+              Hover a date for detail. A gold ring marks a day that is as good as it gets here.
+            </p>
+          )}
+
+          <p className="text-[0.65rem] text-pine-950/40">
+            {forecastDays > 0 ? `${forecastDays} forecast days · ` : ''}
+            {SITE.region.label} · {FORECAST_PROVIDER}
+          </p>
         </div>
 
         {error && (
-          <p className="mt-4 text-[0.68rem] text-gold-400">
+          <p className="mt-3 text-[0.68rem] text-copper-500">
             Live forecast unavailable — every day is showing typical conditions.
           </p>
         )}
@@ -193,10 +292,10 @@ export function ConditionsCalendar({ selected, onSelect, compact = false }: Prop
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="h-fit rounded-2xl border border-bone-100/10 bg-pine-900/40 p-6"
+          className="h-fit rounded-2xl border border-pine-950/10 bg-bone-100 p-6"
         >
           <div className="flex items-baseline justify-between gap-3">
-            <p className="eyebrow">
+            <p className="eyebrow text-turf-600/80">
               {cursor.toLocaleDateString('en-NZ', { month: 'long' })} in Wānaka
             </p>
             <span
@@ -208,36 +307,25 @@ export function ConditionsCalendar({ selected, onSelect, compact = false }: Prop
             </span>
           </div>
 
-          <p className="mt-4 text-sm leading-relaxed text-bone-200">{MONTH_NOTE[month]}</p>
+          <p className="mt-4 text-sm leading-relaxed text-pine-950/80">{MONTH_NOTE[month]}</p>
 
-          <dl className="mt-6 space-y-2.5 border-t border-bone-100/10 pt-5 text-sm">
-            <div className="flex justify-between">
-              <dt className="text-bone-400/70">Typical high</dt>
-              <dd className="tabular-nums text-bone-100">{normal.tempMaxC}°C</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-bone-400/70">Overnight low</dt>
-              <dd className="tabular-nums text-bone-100">{normal.tempMinC}°C</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-bone-400/70">Days with rain</dt>
-              <dd className="tabular-nums text-bone-100">{normal.wetDayPct}%</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-bone-400/70">Peak wind</dt>
-              <dd className="tabular-nums text-bone-100">{normal.windMaxKmh} km/h</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-bone-400/70">Daylight</dt>
-              <dd className="tabular-nums text-bone-100">{DAYLIGHT_HOURS[month]} hrs</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-bone-400/70">Ranked for golf</dt>
-              <dd className="tabular-nums text-bone-100">{rankFor(month)} of 12</dd>
-            </div>
+          <dl className="mt-6 space-y-2.5 border-t border-pine-950/10 pt-5 text-sm">
+            {[
+              ['Typical high', `${normal.tempMaxC}°C`],
+              ['Overnight low', `${normal.tempMinC}°C`],
+              ['Days with rain', `${normal.wetDayPct}%`],
+              ['Peak wind', `${normal.windMaxKmh} km/h`],
+              ['Daylight', `${DAYLIGHT_HOURS[month]} hrs`],
+              ['Ranked for golf', `${rankFor(month)} of 12`],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between">
+                <dt className="text-pine-950/50">{k}</dt>
+                <dd className="tabular-nums text-pine-950">{v}</dd>
+              </div>
+            ))}
           </dl>
 
-          <p className="mt-5 text-[0.62rem] leading-relaxed text-bone-400/60">
+          <p className="mt-5 text-[0.62rem] leading-relaxed text-pine-950/40">
             Typical figures from {CLIMATE_REFERENCE}.
           </p>
         </motion.aside>
