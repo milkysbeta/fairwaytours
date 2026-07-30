@@ -77,6 +77,41 @@ export function formatArrival(iso: string | null): string {
   })
 }
 
+/**
+ * Trade enquiries from luxury travel advisors, golf specialists and incentive
+ * planners. Kept separate from guest enquiries because the qualifying questions
+ * and the reply are different — an advisor wants commission terms and a rate
+ * sheet, not an itinerary.
+ */
+export type TradeEnquiry = {
+  agency: string
+  contact: string
+  email: string
+  market: string
+  clientProfile: string
+  notes: string
+}
+
+export const EMPTY_TRADE: TradeEnquiry = {
+  agency: '',
+  contact: '',
+  email: '',
+  market: '',
+  clientProfile: '',
+  notes: '',
+}
+
+export async function submitTradeEnquiry(t: TradeEnquiry): Promise<void> {
+  // TODO(backend): same unwired endpoint as guest enquiries, tagged so the two
+  // can be routed to different inboxes.
+  const res = await fetch('/api/enquiries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind: 'trade', ...t }),
+  })
+  if (!res.ok) throw new Error('Submission failed')
+}
+
 export async function submitEnquiry(e: Enquiry): Promise<void> {
   // TODO(backend): still unwired. Needs a host decision (Netlify/Vercel/
   // Cloudflare function) plus an email forward and a CRM hand-off — the plan

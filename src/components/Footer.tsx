@@ -43,9 +43,11 @@ export function Footer() {
                 The Signature Escape
               </a>
             </li>
-            {/* TODO(client): travel-advisor and trade enquiry route — the plan
-                makes luxury agents a primary channel, and they need their own
-                contact path with commission terms. */}
+            <li>
+              <Link to="/trade" className="transition-colors hover:text-bone-50">
+                Travel advisors &amp; trade
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

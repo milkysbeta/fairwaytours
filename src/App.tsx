@@ -3,6 +3,7 @@ import { Nav } from '@/components/Nav'
 import { Footer } from '@/components/Footer'
 import { Home } from '@/pages/Home'
 import { Enquire } from '@/pages/Enquire'
+import { Trade } from '@/pages/Trade'
 import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 
 function Shell() {
@@ -14,6 +15,7 @@ function Shell() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/enquire" element={<Enquire />} />
+        <Route path="/trade" element={<Trade />} />
       </Routes>
       <Footer />
     </>
