@@ -7,12 +7,12 @@ const nzd = (n: number) => `NZD $${n.toLocaleString('en-NZ')}`
 
 export function Journeys() {
   return (
-    <section id="journeys" className="relative py-28 md:py-40">
+    <section id="journeys" className="relative py-24 md:py-32">
       <div className="container-page">
         <SectionHeading
           eyebrow="The journeys"
           title="Four ways in. All of them private."
-          lede="Most guests start with the Signature Escape and change three things about it. That is rather the point — the itinerary is a starting position, not a package."
+          lede="Most guests start with the Signature Escape and change three things about it. That is the point."
         />
 
         <div className="mt-16 grid gap-5 lg:grid-cols-2">
@@ -86,9 +86,8 @@ export function Journeys() {
 
         <Reveal delay={0.1}>
           <p className="mt-10 max-w-xl text-sm leading-relaxed text-bone-400">
-            Prices are per guest, twin share, and cover accommodation, green fees, private transport
-            and hosting. Flights are not included. Every journey is costed by hand once we know the
-            shape of it.
+            Per guest, twin share. Accommodation, green fees, transport and hosting included; flights
+            are not.
           </p>
         </Reveal>
       </div>

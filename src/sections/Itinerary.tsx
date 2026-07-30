@@ -23,13 +23,13 @@ export function Itinerary() {
   const fill = useSpring(scrollYProgress, { stiffness: 90, damping: 30, restDelta: 0.001 })
 
   return (
-    <section id="itinerary" className="relative bg-bone-100 py-28 md:py-40">
+    <section id="itinerary" className="relative bg-bone-100 py-24 md:py-32">
       <div className="container-page">
         <SectionHeading
           tone="light"
           eyebrow="The Signature Escape"
           title="Five days, arranged down to the table."
-          lede="Two bases rather than one, so the drives happen while you are playing rather than while you are waiting. Everything below moves if you want it to."
+          lede="Two bases, so the drives happen while you are playing. All of it moves if you want it to."
         />
 
         <div ref={ref} className="relative mt-16 pl-8 md:pl-14">

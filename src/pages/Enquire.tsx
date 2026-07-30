@@ -1,17 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { JOURNEYS, journeyById, type JourneyType } from '@/data/journeys'
 import { COURSES } from '@/data/courses'
 import { EXPERIENCES } from '@/data/experiences'
 import { SITE } from '@/data/site'
+import { ConditionsCalendar } from '@/components/ConditionsCalendar'
 import {
   BUDGET_BANDS,
   EMPTY_ENQUIRY,
+  formatArrival,
   indicativeFrom,
   partySize,
   submitEnquiry,
-  travelMonths,
   type BudgetBand,
   type Enquiry,
 } from '@/lib/enquiry'
@@ -26,14 +27,16 @@ const FIELD =
 
 export function Enquire() {
   const [params] = useSearchParams()
-  const months = useMemo(() => travelMonths(), [])
 
   const [step, setStep] = useState(0)
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [enquiry, setEnquiry] = useState<Enquiry>(() => {
     const requested = params.get('journey') as JourneyType | null
-    const valid = JOURNEYS.some((j) => j.id === requested) ? requested : null
-    return { ...EMPTY_ENQUIRY, journey: valid }
+    const journey = JOURNEYS.some((j) => j.id === requested) ? requested : null
+    // Deep-linked from the conditions calendar on the homepage.
+    const date = params.get('date')
+    const arrivalDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null
+    return { ...EMPTY_ENQUIRY, journey, arrivalDate }
   })
 
   const set = <K extends keyof Enquiry>(key: K, value: Enquiry[K]) =>
@@ -50,7 +53,7 @@ export function Enquire() {
   const from = indicativeFrom(enquiry)
 
   const canAdvance = [
-    enquiry.journey !== null && enquiry.travelMonth !== null,
+    enquiry.journey !== null && enquiry.arrivalDate !== null,
     enquiry.golfers > 0,
     true, // interests are optional — never block a lead on a nice-to-have
     enquiry.name.trim() !== '' && enquiry.email.trim() !== '',
@@ -145,28 +148,19 @@ export function Enquire() {
                   </div>
                 </fieldset>
 
-                <div>
-                  <label htmlFor="travelMonth" className="text-xl text-bone-50">
-                    Roughly when?
-                  </label>
+                <fieldset>
+                  <legend className="text-xl text-bone-50">Arriving when?</legend>
                   <p className="mt-2 text-sm text-bone-400">
-                    A month is enough at this stage. The best courses and lodges are held six to nine
-                    months ahead, so the earlier we know, the more we can secure.
+                    Conditions shown for every date. Approximate is fine.
                   </p>
-                  <select
-                    id="travelMonth"
-                    value={enquiry.travelMonth ?? ''}
-                    onChange={(e) => set('travelMonth', e.target.value || null)}
-                    className={`${FIELD} mt-5 max-w-xs`}
-                  >
-                    <option value="">Select a month</option>
-                    {months.map((m) => (
-                      <option key={m.value} value={m.value}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  <div className="mt-7">
+                    <ConditionsCalendar
+                      compact
+                      selected={enquiry.arrivalDate}
+                      onSelect={(iso) => set('arrivalDate', iso)}
+                    />
+                  </div>
+                </fieldset>
 
                 <div>
                   <label htmlFor="nights" className="text-xl text-bone-50">
@@ -401,7 +395,7 @@ export function Enquire() {
             <div>
               <dt className="text-bone-400/60">When</dt>
               <dd className="mt-0.5 text-bone-100">
-                {months.find((m) => m.value === enquiry.travelMonth)?.label ?? '—'}
+                {formatArrival(enquiry.arrivalDate)}
                 {enquiry.nights ? ` · ${enquiry.nights} nights` : ''}
               </dd>
             </div>

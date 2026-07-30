@@ -76,12 +76,12 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 
 export function Courses() {
   return (
-    <section id="courses" className="relative py-28 md:py-40">
+    <section id="courses" className="relative py-24 md:py-32">
       <div className="container-page">
         <SectionHeading
           eyebrow="The access"
           title="Five courses. Two you cannot simply book."
-          lede="Wānaka to Arrowtown to the shores of Wakatipu. The Hills is private and Jacks Point rations its visitor times — getting you onto them takes a relationship, not a booking form."
+          lede="The Hills is private. Jacks Point rations its visitor times. Getting you onto them takes a relationship, not a booking form."
         />
 
         <div className="mt-16 grid gap-5 md:grid-cols-2">

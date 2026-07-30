@@ -7,7 +7,7 @@ const LINKS = [
   { href: '/#itinerary', label: 'The five days' },
   { href: '/#courses', label: 'Courses' },
   { href: '/#experiences', label: 'Experiences' },
-  { href: '/#seasons', label: 'When to come' },
+  { href: '/#conditions', label: 'When to come' },
 ]
 
 export function Nav() {

@@ -1,4 +1,5 @@
 import { SITE } from '@/data/site'
+import type { MonthNormal } from '@/data/climate'
 
 /**
  * Open-Meteo — free, keyless, good NZ coverage.
@@ -101,6 +102,50 @@ export async function fetchForecast(days = 14, signal?: AbortSignal): Promise<Da
     const score = scoreDay(base)
     return { ...base, score, verdict: verdictFor(score) }
   })
+}
+
+/**
+ * A day in the calendar, from whichever source can actually speak to it.
+ *
+ * `forecast` days come from Open-Meteo and are real predictions. `typical` days
+ * are the ERA5 monthly normals — an honest statement of what that date usually
+ * looks like, which is the only truthful thing to show a guest booking nine
+ * months out. The distinction is surfaced in the UI rather than blurred.
+ */
+export type DayOutlook = {
+  date: string
+  source: 'forecast' | 'typical'
+  tempMaxC: number
+  windMaxKmh: number
+  score: number
+  verdict: GolfVerdict
+  /** Forecast only. */
+  code?: number
+  precipChance?: number
+}
+
+export function outlookFromForecast(d: DayForecast): DayOutlook {
+  return {
+    date: d.date,
+    source: 'forecast',
+    tempMaxC: d.tempMaxC,
+    windMaxKmh: d.windMaxKmh,
+    score: d.score,
+    verdict: d.verdict,
+    code: d.code,
+    precipChance: d.precipChance,
+  }
+}
+
+export function outlookFromNormal(date: string, n: MonthNormal): DayOutlook {
+  return {
+    date,
+    source: 'typical',
+    tempMaxC: Math.round(n.tempMaxC),
+    windMaxKmh: n.windMaxKmh,
+    score: n.score,
+    verdict: verdictFor(n.score),
+  }
 }
 
 /** WMO weather code → short human label. */

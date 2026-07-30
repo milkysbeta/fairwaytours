@@ -4,12 +4,12 @@ import { Reveal } from '@/components/Reveal'
 
 export function Stays() {
   return (
-    <section id="stays" className="relative py-28 md:py-40">
+    <section id="stays" className="relative py-24 md:py-32">
       <div className="container-page">
         <SectionHeading
           eyebrow="Where you stay"
           title="Lodges and villas, not hotel blocks."
-          lede="We place guests in a small number of properties we know personally, and we hold rooms in them well ahead of the season."
+          lede="A small number of properties we know personally, held well ahead of the season."
         />
 
         <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

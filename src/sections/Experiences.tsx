@@ -4,12 +4,12 @@ import { Reveal } from '@/components/Reveal'
 
 export function Experiences() {
   return (
-    <section id="experiences" className="relative py-28 md:py-40">
+    <section id="experiences" className="relative py-24 md:py-32">
       <div className="container-page">
         <SectionHeading
           eyebrow="Between the rounds"
           title="The golf is the anchor, not the itinerary."
-          lede="What guests remember is rarely the card. It is the helicopter that landed on a tee no one else can reach, or the table that appeared at the end of a very long day."
+          lede="What guests remember is rarely the card."
         />
 
         <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-bone-100/10 bg-bone-100/10 sm:grid-cols-2 lg:grid-cols-3">

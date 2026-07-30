@@ -9,7 +9,7 @@ export function About() {
   const portraitY = useTransform(scrollYProgress, [0, 1], ['-8%', '8%'])
 
   return (
-    <section id="about" ref={ref} className="relative py-28 md:py-40">
+    <section id="about" ref={ref} className="relative py-24 md:py-32">
       <div className="container-page grid items-center gap-14 md:grid-cols-2 md:gap-20">
         <Reveal>
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-bone-100/10">
@@ -50,13 +50,8 @@ export function About() {
                 is years of living here and knowing the people who say yes.
               </p>
               <p>
-                Jacob hosts every journey personally. He knows which tee to take when the nor'wester
-                gets up, which table has the view, and how long the Crown Range really takes when it
-                matters.
-              </p>
-              <p>
-                One person, one number, from the first enquiry to the moment your clubs are checked
-                in for the flight home.
+                Jacob hosts every journey himself. One person, one number, from the first enquiry to
+                the moment your clubs are checked in for the flight home.
               </p>
             </div>
           </Reveal>

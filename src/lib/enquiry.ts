@@ -9,8 +9,8 @@ import { journeyById, type JourneyType } from '@/data/journeys'
  */
 export type Enquiry = {
   journey: JourneyType | null
-  /** Month + year, not a calendar date — this market books far ahead. */
-  travelMonth: string | null
+  /** ISO arrival date, chosen on the conditions calendar. */
+  arrivalDate: string | null
   nights: number | null
   golfers: number
   nonGolfers: number
@@ -37,7 +37,7 @@ export const BUDGET_BANDS: { id: BudgetBand; label: string; hint: string }[] = [
 
 export const EMPTY_ENQUIRY: Enquiry = {
   journey: null,
-  travelMonth: null,
+  arrivalDate: null,
   nights: null,
   golfers: 2,
   nonGolfers: 0,
@@ -68,15 +68,12 @@ export function partySize(e: Enquiry): number {
   return e.golfers + e.nonGolfers
 }
 
-/** The next twenty-four months, as `YYYY-MM` with a readable label. */
-export function travelMonths(from = new Date()): { value: string; label: string }[] {
-  return Array.from({ length: 24 }, (_, i) => {
-    const d = new Date(from.getFullYear(), from.getMonth() + i, 1)
-    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    return {
-      value,
-      label: d.toLocaleDateString('en-NZ', { month: 'long', year: 'numeric' }),
-    }
+export function formatArrival(iso: string | null): string {
+  if (!iso) return '—'
+  return new Date(`${iso}T00:00:00`).toLocaleDateString('en-NZ', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   })
 }
 

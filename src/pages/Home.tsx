@@ -4,7 +4,7 @@ import { Itinerary } from '@/sections/Itinerary'
 import { Courses } from '@/sections/Courses'
 import { Experiences } from '@/sections/Experiences'
 import { Stays } from '@/sections/Stays'
-import { Seasons } from '@/sections/Seasons'
+import { Conditions } from '@/sections/Conditions'
 import { About } from '@/sections/About'
 
 /**
@@ -21,7 +21,7 @@ export function Home() {
       <Courses />
       <Experiences />
       <Stays />
-      <Seasons />
+      <Conditions />
       <About />
     </main>
   )
