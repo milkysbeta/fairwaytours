@@ -35,6 +35,26 @@ no code change needed.
 | `experiences/table.jpg` | Martini glasses on a fairway | Private dining |
 | `experiences/clubs.jpg` | Clubs in a bag | High-country or equipment detail |
 | `jacob.jpg` | *(missing)* | Portrait of Jacob |
+| `cut-grass.png` | Generated turf with a blade-cut lower edge | The client's own cut-grass.png |
+
+### Replacing cut-grass.png
+
+Drop the file in at `public/media/cut-grass.png` — no code change needed. For it
+to work as a section transition it needs:
+
+- **Solid across the top.** The top edge butts against a dark section, so the
+  first few rows must be fully opaque. The current file starts at `#04140f`,
+  which is the page ground colour.
+- **Transparent at the bottom**, with the cut dissolving gradually rather than
+  ending on a line. Abrupt endings read as a sticker.
+- **Wide.** It is stretched across the full viewport with `object-cover`, so
+  1800px or more, otherwise it softens on a large monitor.
+- Roughly 4:1. The current placeholder is 2400×620.
+
+The component draws it twice at different scroll rates. The back copy is
+blurred and knocked back to 40% — if your image is much busier than the
+placeholder, that back layer may want turning down further in
+`components/GrassDivider.tsx`.
 
 Anything still missing falls back to a gradient rather than a broken frame, so
 the site stays presentable while the shoot is arranged.

@@ -32,22 +32,27 @@ export function GrassDivider({ below = '#ffffff', flip = false, className = '' }
   })
 
   // Far layer barely moves; near layer travels, and scales a touch as it goes.
-  const farY = useTransform(scrollYProgress, [0, 1], reduce ? ['0%', '0%'] : ['-6%', '6%'])
-  const nearY = useTransform(scrollYProgress, [0, 1], reduce ? ['0%', '0%'] : ['-18%', '14%'])
-  const nearScale = useTransform(scrollYProgress, [0, 1], reduce ? [1, 1] : [1.06, 1.14])
+  const farY = useTransform(scrollYProgress, [0, 1], reduce ? ['0%', '0%'] : ['-4%', '4%'])
+  const nearY = useTransform(scrollYProgress, [0, 1], reduce ? ['0%', '0%'] : ['-14%', '11%'])
+  const nearScale = useTransform(scrollYProgress, [0, 1], reduce ? [1, 1] : [1.04, 1.1])
 
   return (
     <div
       ref={ref}
       aria-hidden
-      className={`pointer-events-none relative h-40 w-full overflow-hidden select-none md:h-56 ${className}`}
+      className={`pointer-events-none relative h-48 w-full overflow-hidden select-none md:h-64 ${className}`}
       style={{ backgroundColor: below, transform: flip ? 'scaleY(-1)' : undefined }}
     >
+      {/*
+        The far layer is heavily knocked back and blurred. At anything near the
+        near layer's weight the two silhouettes read as one doubled edge rather
+        than as depth — which is exactly what the first version did.
+      */}
       <motion.img
         src={GRASS}
         alt=""
-        style={{ y: farY }}
-        className="absolute inset-x-0 top-0 h-full w-full scale-105 object-cover opacity-55"
+        style={{ y: farY, filter: 'blur(3px) brightness(0.55)' }}
+        className="absolute inset-x-0 top-0 h-full w-full scale-[1.12] object-cover opacity-40"
         onError={(e) => {
           e.currentTarget.style.display = 'none'
         }}
