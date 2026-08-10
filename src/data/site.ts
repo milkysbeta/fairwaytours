@@ -2,9 +2,9 @@
  * Every piece of copy reads `name` from here, so changing it here changes it
  * everywhere.
  *
- * NOTE(client): the brand is plural — Fairway Tours — but the registered domain
- * is the singular fairwaytour.co.nz. Anyone who types the plural lands nowhere.
- * Secure fairwaytours.co.nz and redirect it here, or accept the leak.
+ * The registered domain is fairwaytours.co.nz — confirmed live on Porkbun
+ * nameservers. The singular fairwaytour.co.nz does not resolve and is not
+ * registered, despite appearing in the project folder name.
  */
 export const SITE = {
   name: 'Fairway Tours',
@@ -13,7 +13,7 @@ export const SITE = {
   positioning:
     'Private golf journeys through Wānaka, Arrowtown and Queenstown — elite course access, luxury lodges, and a host who handles everything in between.',
   /** TODO(client): real contact details before launch. */
-  email: 'enquiries@fairwaytour.co.nz',
+  email: 'enquiries@fairwaytours.co.nz',
   phone: '+64 00 000 0000',
   founder: {
     name: 'Jacob Matthews',
