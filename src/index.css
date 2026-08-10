@@ -74,6 +74,12 @@
     overflow-x: hidden;
   }
 
+  /* The nav is fixed, so an anchor link would otherwise drop the section
+     heading underneath it. */
+  section[id] {
+    scroll-margin-top: 6rem;
+  }
+
   ::selection {
     background-color: var(--color-fairway-500);
     color: var(--color-pine-950);

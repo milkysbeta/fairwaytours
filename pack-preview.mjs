@@ -45,24 +45,51 @@ if (MEDIA) {
 
 const title = readFileSync('index.html', 'utf8').match(/<title>([\s\S]*?)<\/title>/)[1]
 
+/**
+ * The preview host serves text/html with no charset parameter, so a browser
+ * falls back to windows-1252 and every ā, °, · and em dash renders as mojibake.
+ * We cannot set a response header and a <meta charset> lands after the host's
+ * own </head>, so the reliable fix is to ship no non-ASCII bytes at all.
+ *
+ * \uXXXX is valid in JS strings, template literals and regex, which is where
+ * every one of these characters lives in a bundle built from this source.
+ */
+const asciiJs = (s) =>
+  s.replace(/[\u0080-\uFFFF]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`)
+
+/** CSS uses a different escape form, and needs the trailing space to terminate. */
+const asciiCss = (s) =>
+  s.replace(/[\u0080-\uFFFF]/g, (c) => `\\${c.charCodeAt(0).toString(16).padStart(4, '0')} `)
+
+const safeJs = asciiJs(js)
+const safeCss = asciiCss(css)
+const safeTitle = title.replace(/[\u0080-\uFFFF]/g, (c) => `&#${c.charCodeAt(0)};`)
+
 // The host wraps this in its own doctype/head/body, so emit page content only.
-writeFileSync(
-  OUT,
-  `<title>${title}</title>
+// The meta is belt and braces: the encoding sniffer scans the first 1024 bytes
+// of the document regardless of which element it sits in.
+const out = `<meta charset="utf-8">
+<title>${safeTitle}</title>
 <style>
 ${fonts}
-${css}
+${safeCss}
 /* The host's reset leaves the body transparent; the app expects its own ground. */
 body { background: #04140f; margin: 0; }
 </style>
 <div id="root"></div>
 <script type="module">
-${js}
+${safeJs}
 </script>
-`,
-)
+`
+
+const nonAscii = out.match(/[\u0080-\uFFFF]/g)
+if (nonAscii) {
+  throw new Error(`packed output still has ${nonAscii.length} non-ASCII bytes, e.g. ${nonAscii[0]}`)
+}
+
+writeFileSync(OUT, out)
 
 const kb = (n) => (n / 1024).toFixed(0) + 'KB'
 console.log(
-  `\n${OUT}\n  js ${kb(js.length)}  css ${kb(css.length)}  fonts ${kb(fonts.length)}  images inlined: ${inlined}`,
+  `\n${OUT}\n  js ${kb(safeJs.length)}  css ${kb(safeCss.length)}  fonts ${kb(fonts.length)}  images inlined: ${inlined}`,
 )
