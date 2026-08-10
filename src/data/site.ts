@@ -1,16 +1,19 @@
 /**
- * TODO(client): `name` is the plan's recommended positioning name. Every piece
- * of copy reads from this constant, so changing it here changes it everywhere.
- * Alternates shortlisted in the plan: Alpine Links NZ, Aoraki Golf & Touring.
+ * Every piece of copy reads `name` from here, so changing it here changes it
+ * everywhere.
+ *
+ * NOTE(client): the brand is plural — Fairway Tours — but the registered domain
+ * is the singular fairwaytour.co.nz. Anyone who types the plural lands nowhere.
+ * Secure fairwaytours.co.nz and redirect it here, or accept the leak.
  */
 export const SITE = {
-  name: 'Southern Fairways',
+  name: 'Fairway Tours',
   tagline: 'The South Island, played properly.',
   /** One line, used in the meta description and the footer. */
   positioning:
     'Private golf journeys through Wānaka, Arrowtown and Queenstown — elite course access, luxury lodges, and a host who handles everything in between.',
   /** TODO(client): real contact details before launch. */
-  email: 'enquiries@southernfairways.co.nz',
+  email: 'enquiries@fairwaytour.co.nz',
   phone: '+64 00 000 0000',
   founder: {
     name: 'Jacob Matthews',

@@ -63,6 +63,13 @@ Porkbun supports ALIAS at the apex, which is the right record here — a CNAME i
 not legal at the apex, and an A record pins you to an IP that can change. If
 ALIAS is unavailable for any reason, use `A` → `75.2.60.5`.
 
+### The plural domain
+
+The brand is **Fairway Tours** but the registered domain is the singular
+**fairwaytour.co.nz**. Anyone typing the plural lands nowhere. Register
+`fairwaytours.co.nz` and add it in Netlify as a domain alias — Netlify will
+redirect it to the primary automatically — or accept the leak.
+
 Propagation is usually minutes on Porkbun, occasionally an hour. Netlify issues
 the Let's Encrypt certificate automatically once it can see the records; if HTTPS
 is still failing after an hour, **Domain management → HTTPS → Renew certificate**.
