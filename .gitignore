@@ -25,3 +25,7 @@ dist-ssr
 
 # Netlify
 .netlify
+
+# Preview packing artefacts (generated, not source)
+media-inline.json
+fonts-inline.css
