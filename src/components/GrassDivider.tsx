@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
+import { asset } from '@/lib/asset'
 
 /**
  * The transition between a dark section and a light one.
@@ -12,7 +13,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion
  * TODO(client): the current PNG is a generated stand-in. Replace it with
  * cut-grass.png from the project image folder; same alpha shape, same filename.
  */
-const GRASS = '/media/cut-grass.png'
+const GRASS = asset('/media/cut-grass.png')
 
 type Props = {
   /** Colour of the section beneath, which the cut reveals. */

@@ -31,9 +31,19 @@ function Shell() {
 const Router = import.meta.env.VITE_HASH_ROUTER ? HashRouter : BrowserRouter
 
 export default function App() {
+  if (import.meta.env.VITE_HASH_ROUTER) {
+    return (
+      <Router>
+        <Shell />
+      </Router>
+    )
+  }
+
+  // BASE_URL is '/' on Netlify and '/fairwaytours/' on GitHub Pages, so the
+  // router has to be told which prefix its paths sit behind.
   return (
-    <Router>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Shell />
-    </Router>
+    </BrowserRouter>
   )
 }

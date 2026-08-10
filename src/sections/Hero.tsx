@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { HERO_POSTER, HERO_SEQUENCE } from '@/data/hero'
 import { SITE } from '@/data/site'
+import { asset } from '@/lib/asset'
 
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null)
@@ -36,7 +37,7 @@ export function Hero() {
         {/* Still frame. Carries the hero until footage lands, then sits behind
             the clips while they crossfade. */}
         <img
-          src={HERO_POSTER}
+          src={asset(HERO_POSTER)}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           onError={(e) => {
@@ -48,7 +49,7 @@ export function Hero() {
           <AnimatePresence mode="sync">
             <motion.video
               key={segment.id}
-              src={segment.src}
+              src={asset(segment.src)}
               autoPlay
               muted
               playsInline

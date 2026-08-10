@@ -3,6 +3,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion
 import { EXPERIENCES, type Experience } from '@/data/experiences'
 import { SectionHeading } from '@/components/SectionHeading'
 import { Reveal } from '@/components/Reveal'
+import { asset } from '@/lib/asset'
 
 function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
   const ref = useRef<HTMLElement>(null)
@@ -22,7 +23,7 @@ function ExperienceCard({ exp, index }: { exp: Experience; index: number }) {
         {exp.image && (
           <>
             <motion.img
-              src={exp.image}
+              src={asset(exp.image)}
               alt=""
               loading="lazy"
               style={{ y: imageY }}

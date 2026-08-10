@@ -1,0 +1,60 @@
+name: Deploy to GitHub Pages
+
+# A shareable preview URL at https://milkysbeta.github.io/fairwaytours/.
+#
+# This is for showing people the site, not for running it. GitHub Pages is
+# static-only, so /api/enquiries does not exist there and the enquiry forms will
+# fail — Netlify remains the real deployment. See DEPLOY.md.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          # Pages serves a project site from /<repo>/, not from the root.
+          VITE_BASE: /fairwaytours/
+        run: npm run build
+
+      - name: Add SPA fallback
+        # Pages has no rewrite rules, so a deep link like /enquire 404s. Serving
+        # index.html as the 404 page hands the URL back to the router.
+        run: cp dist/index.html dist/404.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

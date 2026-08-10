@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { SITE } from '@/data/site'
 import { Reveal } from '@/components/Reveal'
+import { asset } from '@/lib/asset'
 
 export function About() {
   const ref = useRef<HTMLElement>(null)
@@ -16,7 +17,7 @@ export function About() {
             <div className="absolute inset-0 bg-[radial-gradient(80%_80%_at_50%_30%,var(--color-pine-700),var(--color-pine-950))]" />
             {/* TODO(client): portrait of Jacob — /media/jacob.jpg */}
             <motion.img
-              src="/media/jacob.jpg"
+              src={asset("/media/jacob.jpg")}
               alt={SITE.founder.name}
               style={{ y: portraitY }}
               loading="lazy"

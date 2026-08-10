@@ -3,6 +3,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { COURSES, type Course } from '@/data/courses'
 import { SectionHeading } from '@/components/SectionHeading'
 import { Reveal } from '@/components/Reveal'
+import { asset } from '@/lib/asset'
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
   const ref = useRef<HTMLElement>(null)
@@ -18,7 +19,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
       >
         <div className="relative h-72 overflow-hidden">
           <motion.img
-            src={course.image}
+            src={asset(course.image)}
             alt={course.name}
             loading="lazy"
             style={{ y: imageY }}
