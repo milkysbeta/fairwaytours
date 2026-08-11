@@ -1,6 +1,6 @@
 name: Deploy to GitHub Pages
 
-# A shareable preview URL at https://milkysbeta.github.io/fairwaytours/.
+# Builds and publishes the site to GitHub Pages at fairwaytours.co.nz.
 #
 # This is for showing people the site, not for running it. GitHub Pages is
 # static-only, so /api/enquiries does not exist there and the enquiry forms will
@@ -35,9 +35,10 @@ jobs:
       - run: npm ci
 
       - name: Build
-        env:
-          # Pages serves a project site from /<repo>/, not from the root.
-          VITE_BASE: /fairwaytours/
+        # public/CNAME points Pages at fairwaytours.co.nz, and a custom domain
+        # serves from the root — so no VITE_BASE override here. Restore
+        # VITE_BASE=/fairwaytours/ if the custom domain is ever removed, or
+        # every asset path will 404 on the github.io URL.
         run: npm run build
 
       - name: Add SPA fallback
