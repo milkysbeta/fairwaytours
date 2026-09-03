@@ -5,6 +5,7 @@ import { Home } from '@/pages/Home'
 import { Enquire } from '@/pages/Enquire'
 import { Trade } from '@/pages/Trade'
 import { useSmoothScroll } from '@/hooks/useSmoothScroll'
+import { routerBasename } from '@/lib/basename'
 
 function Shell() {
   useSmoothScroll()
@@ -23,26 +24,25 @@ function Shell() {
 }
 
 /**
- * Path routing in production. Hash routing when VITE_HASH_ROUTER is set, which
- * is how the standalone client-preview build works — that bundle is served from
- * an arbitrary path with no server rewrite behind it, so pushState navigation
+ * Hash routing for the standalone client-preview bundle, which is served from
+ * an arbitrary path with no server rewrite behind it — pushState navigation
  * would walk straight out of the app.
+ *
+ * Otherwise path routing, with the mount point read off the URL at runtime. See
+ * lib/basename: one build now serves the domain root and the GitHub Pages
+ * project path, so neither has to be chosen at build time.
  */
-const Router = import.meta.env.VITE_HASH_ROUTER ? HashRouter : BrowserRouter
-
 export default function App() {
   if (import.meta.env.VITE_HASH_ROUTER) {
     return (
-      <Router>
+      <HashRouter>
         <Shell />
-      </Router>
+      </HashRouter>
     )
   }
 
-  // BASE_URL is '/' on Netlify and '/fairwaytours/' on GitHub Pages, so the
-  // router has to be told which prefix its paths sit behind.
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename={routerBasename()}>
       <Shell />
     </BrowserRouter>
   )

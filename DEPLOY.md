@@ -43,7 +43,41 @@ that is a second set of DNS records, added the same way as below.
 Leave `VITE_OPENWEATHER_KEY` unset unless you have a reason. Open-Meteo needs no
 key and reaches 16 days; OpenWeather's free tier reaches 5.
 
-## 3. DNS at Porkbun
+## 3. Attaching fairwaytours.co.nz
+
+The build is host-agnostic: Vite emits relative asset paths and the router reads
+its mount point off the URL, so the same artifact serves correctly at both
+`milkysbeta.github.io/fairwaytours/` and the domain root. Nothing needs
+rebuilding differently for the domain.
+
+### On GitHub Pages
+
+1. At Porkbun (**Domain Management → DNS → fairwaytours.co.nz → Edit**), delete
+   the parking records — `207.207.210.229` and `207.207.210.107` at the apex,
+   and `www` → `pixie.porkbun.com` — then add:
+
+   | Type | Host | Answer |
+   | --- | --- | --- |
+   | ALIAS | *(blank)* | `milkysbeta.github.io` |
+   | CNAME | `www` | `milkysbeta.github.io` |
+
+   If ALIAS is unavailable, use four `A` records at the blank host:
+   `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
+
+2. Wait until the apex actually resolves to GitHub. Check with
+   `dig +short fairwaytours.co.nz` or dnschecker.org.
+
+3. **Only then** add a file `public/CNAME` containing `fairwaytours.co.nz` and
+   push. That is the whole change — Pages reads it and switches the site to the
+   custom domain.
+
+4. **Settings → Pages → Enforce HTTPS** once the certificate has issued, which
+   can take up to an hour.
+
+Doing step 3 before step 2 is what broke the site previously: Pages redirects the
+github.io URL to a domain that does not resolve, so neither works.
+
+## 3b. DNS at Porkbun (Netlify route)
 
 Domain: **fairwaytours.co.nz** — registered, on Porkbun nameservers, currently
 serving Porkbun's parking page.

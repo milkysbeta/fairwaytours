@@ -4,14 +4,18 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
 /**
- * `base` is the path the site is served from. Netlify and the real domain serve
- * from the root, so it defaults to '/'. GitHub Pages serves a project site from
- * /<repo>/, and the Pages workflow sets VITE_BASE to match.
+ * A relative base emits './assets/...' rather than '/assets/...', so the same
+ * build works at the domain root and under the GitHub Pages /fairwaytours/
+ * project path. VITE_BASE can still override it if a deployment ever needs an
+ * absolute prefix.
+ *
+ * The router's mount point is worked out at runtime instead — see
+ * src/lib/basename.ts.
  *
  * https://vite.dev/config/
  */
 export default defineConfig({
-  base: process.env.VITE_BASE ?? '/',
+  base: process.env.VITE_BASE ?? './',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

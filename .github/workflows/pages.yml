@@ -35,12 +35,12 @@ jobs:
       - run: npm ci
 
       - name: Build
-        env:
-          # Pages serves a project site from /<repo>/, so assets must be built
-          # against that prefix. Switch to VITE_BASE=/ and add public/CNAME
-          # ONLY once fairwaytours.co.nz actually resolves to GitHub — setting
-          # them first leaves both the github.io URL and the domain broken.
-          VITE_BASE: /fairwaytours/
+        # No base override. Vite emits relative asset paths and the router reads
+        # its mount point off the URL, so this one artifact serves correctly at
+        # https://milkysbeta.github.io/fairwaytours/ AND at the domain root.
+        # Attaching fairwaytours.co.nz later is then just adding public/CNAME
+        # once the DNS resolves — no rebuild config to change, and no window
+        # where one URL is broken because the other was set up early.
         run: npm run build
 
       - name: Add SPA fallback
