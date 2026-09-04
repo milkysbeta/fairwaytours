@@ -67,9 +67,19 @@ rebuilding differently for the domain.
 2. Wait until the apex actually resolves to GitHub. Check with
    `dig +short fairwaytours.co.nz` or dnschecker.org.
 
-3. **Only then** add a file `public/CNAME` containing `fairwaytours.co.nz` and
-   push. That is the whole change — Pages reads it and switches the site to the
-   custom domain.
+3. **Only then**, set the domain in the repository settings:
+   **Settings → Pages → Custom domain** → `fairwaytours.co.nz` → Save.
+
+   This step cannot be done from the repo. Because the site publishes from a
+   custom GitHub Actions workflow, GitHub **ignores** any `CNAME` file —
+   "no CNAME file is created, and any existing CNAME file is ignored and is not
+   required" (GitHub Pages docs, Managing a custom domain). The file is kept in
+   `public/` only so that switching to branch-based publishing would still work;
+   on the Actions path it does nothing.
+
+   Symptom when this step is missed: the domain resolves to GitHub and returns
+   GitHub's own "Site not found" 404, while the github.io URL keeps working and
+   does *not* redirect.
 
 4. **Settings → Pages → Enforce HTTPS** once the certificate has issued, which
    can take up to an hour.
